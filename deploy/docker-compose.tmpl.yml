@@ -1,0 +1,48 @@
+version: '3.5'
+
+services:
+  certificates-manager:
+    image: docker:dind
+    command: /manage-certificates.sh
+    environment:
+      - CERT_NAME
+      - DOMAIN_LIST
+      - EMAIL_LIST
+      - SERVER_STACK
+      - SERVER_SERVICE
+    networks:
+      - redmic-net
+    volumes:
+      - work-vol:/work
+      - acme-vol:/var/www/html
+      - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: manage-certificates
+        target: /manage-certificates.sh
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        delay: 30s
+        window: 2m
+      resources:
+        limits:
+          cpus: '1'
+          memory: 64M
+        reservations:
+          memory: 52M
+
+networks:
+  redmic-net:
+    external: true
+
+volumes:
+  work-vol:
+    name: certificates-manager-vol
+
+  acme-vol:
+    name: acme-vol
+
+configs:
+  manage-certificates:
+    file: ./scripts/manage-certificates.sh
