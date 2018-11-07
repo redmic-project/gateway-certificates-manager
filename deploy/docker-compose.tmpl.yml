@@ -3,7 +3,7 @@ version: '3.5'
 services:
   certificates-manager:
     image: docker:dind
-    command: /manage-certificates.sh
+    command: manage-certificates
     environment:
       - CERT_NAME
       - DOMAIN_LIST
@@ -18,7 +18,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     configs:
       - source: manage-certificates
-        target: /manage-certificates.sh
+        target: /usr/local/bin/manage-certificates
     deploy:
       mode: replicated
       replicas: 1
