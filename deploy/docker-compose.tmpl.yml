@@ -24,8 +24,7 @@ services:
       mode: replicated
       replicas: 1
       restart_policy:
-        delay: 30s
-        window: 2m
+        condition: none
       resources:
         limits:
           cpus: '1'
