@@ -19,6 +19,7 @@ services:
     configs:
       - source: manage-certificates
         target: /usr/local/bin/manage-certificates
+        mode: 0550
     deploy:
       mode: replicated
       replicas: 1
