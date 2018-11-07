@@ -21,7 +21,7 @@ docker run --rm \
 		--cert-name ${CERT_NAME} \
 		-m ${EMAIL_LIST} --agree-tos --no-eff-email \
 		-d ${DOMAIN_LIST} \
-		--post-hook "export UPDATED=1"
+		--post-hook "sh -c \"export UPDATED=1\""
 
 if [ ${UPDATED} -eq "1" ]
 then
