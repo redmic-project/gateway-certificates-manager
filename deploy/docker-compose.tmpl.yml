@@ -3,7 +3,6 @@ version: '3.5'
 services:
   certificates-manager:
     image: docker:latest
-    privileged: true
     command: manage-certificates
     environment:
       - CERT_NAME
@@ -11,11 +10,14 @@ services:
       - EMAIL_LIST
       - SERVER_STACK
       - SERVER_SERVICE
+      - CERTBOT_CONFIG_VOL_NAME
+      - CERTBOT_WORK_VOL_NAME
+      - CERTBOT_LOGS_VOL_NAME
       - ACME_VOL_NAME
     networks:
       - redmic-net
     volumes:
-      - work-vol:/work
+      - config-vol:/certs
       - /var/run/docker.sock:/var/run/docker.sock
     configs:
       - source: manage-certificates
@@ -38,8 +40,14 @@ networks:
     external: true
 
 volumes:
+  config-vol:
+    name: ${CERTBOT_CONFIG_VOL_NAME}
+
   work-vol:
-    name: certificates-manager-vol
+    name: ${CERTBOT_WORK_VOL_NAME}
+
+  logs-vol:
+    name: ${CERTBOT_LOGS_VOL_NAME}
 
 configs:
   manage-certificates:

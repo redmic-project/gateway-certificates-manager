@@ -6,40 +6,36 @@ then
 	exit 1
 fi
 
-mkdir -p \
-	/work/certs \
-	/work/lib \
-	/work/log
-
 docker run --rm \
-	-v /work/certs:/etc/letsencrypt \
-	-v /work/lib:/var/lib/letsencrypt \
-	-v /work/log:/var/log/letsencrypt \
-	-v ${ACME_VOL_NAME:-acme-vol}:/var/www/html \
+	-v ${CERTBOT_CONFIG_VOL_NAME}:/etc/letsencrypt \
+	-v ${CERTBOT_WORK_VOL_NAME}:/var/lib/letsencrypt \
+	-v ${CERTBOT_LOGS_VOL_NAME}:/var/log/letsencrypt \
+	-v ${ACME_VOL_NAME}:/var/www/html \
 	certbot/certbot certonly \
-		--expand --webroot -w /var/www/html/ \
+		--expand \
+		--renew-with-new-domains \
+		--keep-until-expiring \
+		--webroot -w /var/www/html/ \
 		--cert-name ${CERT_NAME} \
 		-m ${EMAIL_LIST} --agree-tos --no-eff-email \
 		-d ${DOMAIN_LIST} \
 		--pre-hook "rm -f /etc/letsencrypt/UPDATED" \
 		--deploy-hook "touch /etc/letsencrypt/UPDATED"
 
-if [ -e /work/certs/UPDATED ]
+if [ -e /certs/UPDATED ]
 then
 	echo "Certificates created for domains: ${DOMAIN_LIST}"
 
-	serverStack=${SERVER_STACK:-nginx-proxy}
-	serverService=${SERVER_SERVICE:-${serverStack}_${serverStack}}
 	secretFiles="chain fullchain privkey"
 
-	if [ ! -e /work/dhparam.pem ]
+	if [ ! -e /certs/dhparam.pem ]
 	then
 		echo "DHParam not found, generating.."
-		openssl dhparam -out /work/dhparam.pem 4096
+		openssl dhparam -out /certs/dhparam.pem 4096
 		dhparamUpdated="1"
 	fi
 
-	echo "Updating certificates in web server service: ${serverService}"
+	echo "Updating certificates in web server service: ${SERVER_SERVICE}"
 
 	for secretFile in ${secretFiles}
 	do
@@ -48,18 +44,18 @@ then
 
 		docker service update \
 			--secret-rm ${secretName} \
-			${serverService}
+			${SERVER_SERVICE}
 
 		docker secret rm ${secretName}
 
 		docker secret create \
-			-l com.docker.stack.namespace ${serverStack}
+			-l com.docker.stack.namespace ${SERVER_STACK}
 			${secretName}
-			/work/certs/live/${CERT_NAME}/${secretFile}.pem
+			/certs/live/${CERT_NAME}/${secretFile}.pem
 
 		docker service update \
 			--secret-add ${secretName} \
-			${serverService}
+			${SERVER_SERVICE}
 	done
 
 	if [ ${dhparamUpdated} -eq "1" ]
@@ -69,18 +65,18 @@ then
 
 		docker service update \
 			--config-rm ${configName} \
-			${serverService}
+			${SERVER_SERVICE}
 
 		docker config rm ${configName}
 
 		docker config create \
-			-l com.docker.stack.namespace ${serverStack}
+			-l com.docker.stack.namespace ${SERVER_STACK}
 			${configName}
-			/work/dhparam.pem
+			/certs/dhparam.pem
 
 		docker service update \
 			--config-add ${configName} \
-			${serverService}
+			${SERVER_SERVICE}
 	fi
 
 	echo "Certificates successfully updated"
