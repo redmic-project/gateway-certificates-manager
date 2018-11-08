@@ -15,15 +15,16 @@ docker run --rm \
 	-v /work/certs:/etc/letsencrypt \
 	-v /work/lib:/var/lib/letsencrypt \
 	-v /work/log:/var/log/letsencrypt \
-	-v /var/www/html:/var/www/html \
+	-v ${ACME_VOL_NAME:-acme-vol}:/var/www/html \
 	certbot/certbot certonly \
 		--expand --webroot -w /var/www/html/ \
 		--cert-name ${CERT_NAME} \
 		-m ${EMAIL_LIST} --agree-tos --no-eff-email \
 		-d ${DOMAIN_LIST} \
-		--post-hook "sh -c \"export UPDATED=1\""
+		--pre-hook "rm /etc/letsencrypt/UPDATED" \
+		--deploy-hook "touch /etc/letsencrypt/UPDATED"
 
-if [ ${UPDATED} -eq "1" ]
+if [ -e /work/certs/UPDATED ]
 then
 	echo "Certificates created for domains: ${DOMAIN_LIST}"
 
