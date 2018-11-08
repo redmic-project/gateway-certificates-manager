@@ -16,6 +16,7 @@ deploy-dev:
     SSH_REMOTE: ${DEV_SSH_REMOTE}
     STACK: ${CI_PROJECT_NAME}
     SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+    STATUS_CHECK_DELAY: 10
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
     CERT_NAME: ${DEV_CERT_NAME}
     DOMAIN_LIST: ${DEV_DOMAIN_LIST}
@@ -40,6 +41,7 @@ deploy-pro:
     SSH_REMOTE: ${PRO_SSH_REMOTE}
     STACK: ${CI_PROJECT_NAME}
     SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+    STATUS_CHECK_DELAY: 10
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.prod.yml
     CERT_NAME: ${PRO_CERT_NAME}
     DOMAIN_LIST: ${PRO_DOMAIN_LIST}

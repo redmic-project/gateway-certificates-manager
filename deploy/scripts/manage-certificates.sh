@@ -25,17 +25,9 @@ docker run --rm \
 if [ -e /certs/UPDATED ]
 then
 	echo "Certificates created for domains: ${DOMAIN_LIST}"
+	echo "Updating certificates in web server service: ${SERVER_SERVICE}"
 
 	secretFiles="chain fullchain privkey"
-
-	if [ ! -e /certs/dhparam.pem ]
-	then
-		echo "DHParam not found, generating.."
-		openssl dhparam -out /certs/dhparam.pem 4096
-		dhparamUpdated="1"
-	fi
-
-	echo "Updating certificates in web server service: ${SERVER_SERVICE}"
 
 	for secretFile in ${secretFiles}
 	do
@@ -48,36 +40,14 @@ then
 
 		docker secret rm ${secretName}
 
-		docker secret create \
-			-l com.docker.stack.namespace ${SERVER_STACK}
-			${secretName}
-			/certs/live/${CERT_NAME}/${secretFile}.pem
+		cat /certs/live/${CERT_NAME}/${secretFile}.pem | docker secret create \
+			-l com.docker.stack.namespace ${SERVER_STACK} \
+			${secretName} -
 
 		docker service update \
 			--secret-add ${secretName} \
 			${SERVER_SERVICE}
 	done
-
-	if [ ${dhparamUpdated} -eq "1" ]
-	then
-		configName="cert-dhparam"
-		echo "Updating service config: ${configName}"
-
-		docker service update \
-			--config-rm ${configName} \
-			${SERVER_SERVICE}
-
-		docker config rm ${configName}
-
-		docker config create \
-			-l com.docker.stack.namespace ${SERVER_STACK}
-			${configName}
-			/certs/dhparam.pem
-
-		docker service update \
-			--config-add ${configName} \
-			${SERVER_SERVICE}
-	fi
 
 	echo "Certificates successfully updated"
 else
