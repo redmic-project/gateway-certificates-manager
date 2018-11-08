@@ -3,6 +3,7 @@ version: '3.5'
 services:
   certificates-manager:
     image: docker:latest
+    privileged: true
     command: manage-certificates
     environment:
       - CERT_NAME

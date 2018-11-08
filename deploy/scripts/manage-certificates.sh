@@ -21,7 +21,7 @@ docker run --rm \
 		--cert-name ${CERT_NAME} \
 		-m ${EMAIL_LIST} --agree-tos --no-eff-email \
 		-d ${DOMAIN_LIST} \
-		--pre-hook "rm /etc/letsencrypt/UPDATED" \
+		--pre-hook "rm -f /etc/letsencrypt/UPDATED" \
 		--deploy-hook "touch /etc/letsencrypt/UPDATED"
 
 if [ -e /work/certs/UPDATED ]
