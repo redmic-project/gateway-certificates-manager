@@ -27,7 +27,7 @@ services:
         condition: none
       resources:
         limits:
-          cpus: '0,5'
+          cpus: '0.5'
           memory: 64M
         reservations:
           memory: 52M
