@@ -1,0 +1,54 @@
+version: '3.5'
+
+services:
+  certificates-manager:
+    image: docker:latest
+    command: manage-certificates
+    environment:
+      - CERT_NAME
+      - DOMAIN_LIST
+      - EMAIL_LIST
+      - SERVER_STACK
+      - SERVER_SERVICE
+      - CERTBOT_CONFIG_VOL_NAME
+      - CERTBOT_WORK_VOL_NAME
+      - CERTBOT_LOGS_VOL_NAME
+      - ACME_VOL_NAME
+    networks:
+      - redmic-net
+    volumes:
+      - config-vol:/certs
+      - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: manage-certificates
+        target: /usr/local/bin/manage-certificates
+        mode: 0550
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 64M
+        reservations:
+          memory: 52M
+
+networks:
+  redmic-net:
+    external: true
+
+volumes:
+  config-vol:
+    name: ${CERTBOT_CONFIG_VOL_NAME}
+
+  work-vol:
+    name: ${CERTBOT_WORK_VOL_NAME}
+
+  logs-vol:
+    name: ${CERTBOT_LOGS_VOL_NAME}
+
+configs:
+  manage-certificates:
+    file: ./scripts/manage-certificates.sh
