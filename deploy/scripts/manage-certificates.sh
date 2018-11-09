@@ -47,7 +47,7 @@ then
 	do
 		secretName="cert-${secretFile}"
 		secretRmParams="${secretRmParams} --secret-rm ${secretName}"
-		secretAddParams="${secretAddParams} --secret-add ${secretName}"
+		secretAddParams="${secretAddParams} --secret-add source=${secretName},target=/etc/nginx/certs/${secretFile}.pem"
 	done
 
 	docker service update ${secretRmParams} ${SERVER_SERVICE}
