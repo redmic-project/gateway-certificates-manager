@@ -10,7 +10,7 @@ variables:
 services:
   - docker:dind
 
-deploy-dev:
+deploy-dev-develop:
   stage: deploy
   image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
@@ -35,7 +35,56 @@ deploy-dev:
     - schedules
   when: manual
 
-deploy-pro:
+deploy-dev-production:
+  stage: deploy
+  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
+  variables:
+    SSH_REMOTE: ${PRO_SSH_REMOTE}
+    STACK: ${CI_PROJECT_NAME}
+    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+    STATUS_CHECK_DELAY: 10
+    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.prod.yml
+    CERT_NAME: ${PRO_CERT_NAME}
+    DOMAIN_LIST: ${PRO_DOMAIN_LIST}
+    EMAIL_LIST: ${PRO_EMAIL_LIST}
+  script:
+    - >
+      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
+      EMAIL_LIST=${EMAIL_LIST}
+  environment:
+    name: pro
+  only:
+    - branches
+  except:
+    - master
+    - schedules
+  when: manual
+
+deploy-pro-develop:
+  stage: deploy
+  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
+  variables:
+    SSH_REMOTE: ${DEV_SSH_REMOTE}
+    STACK: ${CI_PROJECT_NAME}
+    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+    STATUS_CHECK_DELAY: 10
+    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
+    CERT_NAME: ${DEV_CERT_NAME}
+    DOMAIN_LIST: ${DEV_DOMAIN_LIST}
+    EMAIL_LIST: ${DEV_EMAIL_LIST}
+  script:
+    - >
+      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
+      EMAIL_LIST=${EMAIL_LIST}
+  environment:
+    name: dev
+  only:
+    - master
+  except:
+    - schedules
+  when: manual
+
+deploy-pro-production:
   stage: deploy
   image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
