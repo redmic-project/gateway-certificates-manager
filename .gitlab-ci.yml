@@ -10,7 +10,7 @@ variables:
 services:
   - docker:dind
 
-deploy-dev-develop:
+deploy-supporting-branch-develop:
   stage: deploy
   image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
@@ -35,7 +35,31 @@ deploy-dev-develop:
     - schedules
   when: manual
 
-deploy-dev-production:
+deploy-stable-branch-develop:
+  stage: deploy
+  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
+  variables:
+    SSH_REMOTE: ${DEV_SSH_REMOTE}
+    STACK: ${CI_PROJECT_NAME}
+    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+    STATUS_CHECK_DELAY: 10
+    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
+    CERT_NAME: ${DEV_CERT_NAME}
+    DOMAIN_LIST: ${DEV_DOMAIN_LIST}
+    EMAIL_LIST: ${DEV_EMAIL_LIST}
+  script:
+    - >
+      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
+      EMAIL_LIST=${EMAIL_LIST}
+  environment:
+    name: dev
+  only:
+    - master
+  except:
+    - schedules
+  when: manual
+
+deploy-supporting-branch-production:
   stage: deploy
   image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
@@ -60,31 +84,7 @@ deploy-dev-production:
     - schedules
   when: manual
 
-deploy-pro-develop:
-  stage: deploy
-  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
-  variables:
-    SSH_REMOTE: ${DEV_SSH_REMOTE}
-    STACK: ${CI_PROJECT_NAME}
-    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
-    STATUS_CHECK_DELAY: 10
-    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
-    CERT_NAME: ${DEV_CERT_NAME}
-    DOMAIN_LIST: ${DEV_DOMAIN_LIST}
-    EMAIL_LIST: ${DEV_EMAIL_LIST}
-  script:
-    - >
-      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
-      EMAIL_LIST=${EMAIL_LIST}
-  environment:
-    name: dev
-  only:
-    - master
-  except:
-    - schedules
-  when: manual
-
-deploy-pro-production:
+deploy-stable-branch-production:
   stage: deploy
   image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
@@ -108,7 +108,7 @@ deploy-pro-production:
     - schedules
   when: manual
 
-scheduled-renew-dev:
+scheduled-renew-develop:
   stage: maintenance
   image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
@@ -118,7 +118,7 @@ scheduled-renew-dev:
   only:
     - schedules
 
-scheduled-renew-pro:
+scheduled-renew-production:
   stage: maintenance
   image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
