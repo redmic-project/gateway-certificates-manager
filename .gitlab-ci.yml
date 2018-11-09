@@ -2,6 +2,7 @@ image: docker:stable
 
 stages:
   - deploy
+  - maintenance
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -57,3 +58,23 @@ deploy-pro:
   except:
     - schedules
   when: manual
+
+scheduled-renew-dev:
+  stage: maintenance
+  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
+  variables:
+    SSH_REMOTE: ${DEV_SSH_REMOTE}
+    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+  script: relaunch.sh
+  only:
+    - schedules
+
+scheduled-renew-pro:
+  stage: maintenance
+  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
+  variables:
+    SSH_REMOTE: ${PRO_SSH_REMOTE}
+    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+  script: relaunch.sh
+  only:
+    - schedules
