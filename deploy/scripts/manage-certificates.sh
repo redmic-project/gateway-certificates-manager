@@ -60,7 +60,7 @@ then
 		docker secret rm ${secretName}
 
 		cat /certs/live/${CERT_NAME}/${secretFile}.pem | docker secret create \
-			-l com.docker.stack.namespace ${SERVER_STACK} \
+			-l com.docker.stack.namespace=${SERVER_STACK} \
 			${secretName} -
 	done
 
