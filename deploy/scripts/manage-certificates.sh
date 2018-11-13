@@ -68,7 +68,7 @@ then
 
 	docker service update ${secretAddParams} ${SERVER_SERVICE}
 
-	cat <<EOF | docker run -i --rm byrnedo/alpine-curl --data-binary @- \
+	cat <<EOF | docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl --data-binary @- \
 		${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
 		# HELP certificates_updated_date_seconds Certificates updated date in seconds.
 		# TYPE certificates_updated_date_seconds gauge
@@ -77,7 +77,7 @@ EOF
 
 	echo "Certificates successfully updated!"
 else
-	cat <<EOF | docker run -i --rm byrnedo/alpine-curl --data-binary @- \
+	cat <<EOF | docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl --data-binary @- \
 		${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
 		# HELP certificates_valid_date_seconds Certificates still valid verification date in seconds.
 		# TYPE certificates_valid_date_seconds gauge
