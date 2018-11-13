@@ -33,6 +33,8 @@ then
 fi
 
 md5After=$(md5sum "${fileToTestUpdate}")
+metricsJob="cert-update"
+dateInSeconds="$(date +%s)"
 
 if [ "${md5Before}" != "${md5After}" ]
 then
@@ -66,7 +68,21 @@ then
 
 	docker service update ${secretAddParams} ${SERVER_SERVICE}
 
+	cat <<EOF | docker run -i --rm byrnedo/alpine-curl --data-binary @- \
+		${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
+		# HELP certificates_updated_date_seconds Certificates updated date in seconds.
+		# TYPE certificates_updated_date_seconds gauge
+		certificates_updated_date_seconds{label="${CERT_NAME}"} ${dateInSeconds}
+EOF
+
 	echo "Certificates successfully updated!"
 else
+	cat <<EOF | docker run -i --rm byrnedo/alpine-curl --data-binary @- \
+		${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
+		# HELP certificates_valid_date_seconds Certificates still valid verification date in seconds.
+		# TYPE certificates_valid_date_seconds gauge
+		certificates_valid_date_seconds{label="${CERT_NAME}"} ${dateInSeconds}
+EOF
+
 	echo "Certificates are still valid!"
 fi

@@ -14,8 +14,9 @@ services:
       - CERTBOT_WORK_VOL_NAME
       - CERTBOT_LOGS_VOL_NAME
       - ACME_VOL_NAME
+      - PUSHGATEWAY_HOST
     networks:
-      - redmic-net
+      - metric-net
     volumes:
       - config-vol:/certs
       - /var/run/docker.sock:/var/run/docker.sock
@@ -36,7 +37,7 @@ services:
           memory: 52M
 
 networks:
-  redmic-net:
+  metric-net:
     external: true
 
 volumes:
