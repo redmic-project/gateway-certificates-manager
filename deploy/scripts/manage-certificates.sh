@@ -33,6 +33,9 @@ then
 fi
 
 md5After=$(md5sum "${fileToTestUpdate}")
+
+serverStack=$(echo "${SERVER_SERVICE}" | cut -f 1 -d '_')
+
 metricsJob="cert-update"
 dateInSeconds="$(date +%s)"
 
@@ -62,7 +65,7 @@ then
 		docker secret rm ${secretName}
 
 		cat /certs/live/${CERT_NAME}/${secretFile}.pem | docker secret create \
-			-l com.docker.stack.namespace=${SERVER_STACK} \
+			-l com.docker.stack.namespace=${serverStack} \
 			${secretName} -
 	done
 
@@ -76,13 +79,13 @@ then
 EOF
 
 	echo "Certificates successfully updated!"
-else
-	cat <<EOF | docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl --data-binary @- \
-		${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
-		# HELP certificates_valid_date_seconds Certificates still valid verification date in seconds.
-		# TYPE certificates_valid_date_seconds gauge
-		certificates_valid_date_seconds{label="${CERT_NAME}"} ${dateInSeconds}
+fi
+
+cat <<EOF | docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl --data-binary @- \
+	${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
+	# HELP certificates_valid_date_seconds Certificates still valid verification date in seconds.
+	# TYPE certificates_valid_date_seconds gauge
+	certificates_valid_date_seconds{label="${CERT_NAME}"} ${dateInSeconds}
 EOF
 
-	echo "Certificates are still valid!"
-fi
+echo "Certificates are still valid!"
