@@ -8,7 +8,6 @@ services:
       - CERT_NAME
       - DOMAIN_LIST
       - EMAIL_LIST
-      - SERVER_STACK
       - SERVER_SERVICE
       - CERTBOT_CONFIG_VOL_NAME
       - CERTBOT_WORK_VOL_NAME
