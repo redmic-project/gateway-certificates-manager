@@ -9,9 +9,9 @@ fi
 fileToTestUpdate="/certs/live/${CERT_NAME}/chain.pem"
 if [ -e "${fileToTestUpdate}" ]
 then
-	md5Before=$(md5sum "${fileToTestUpdate}")
+	lastUpdateInSecondsBefore="$(stat -c %Y ${fileToTestUpdate})"
 else
-	md5Before=0
+	lastUpdateInSecondsBefore=0
 fi
 
 if ! docker run --rm \
@@ -32,14 +32,14 @@ then
 	exit 1
 fi
 
-md5After=$(md5sum "${fileToTestUpdate}")
+lastUpdateInSecondsAfter="$(stat -c %Y ${fileToTestUpdate})"
 
 serverStack=$(echo "${SERVER_SERVICE}" | cut -f 1 -d '_')
 
 metricsJob="cert-update"
 dateInSeconds="$(date +%s)"
 
-if [ "${md5Before}" != "${md5After}" ]
+if [ "${lastUpdateInSecondsBefore}" != "${lastUpdateInSecondsAfter}" ]
 then
 	echo "Certificates created for domains: ${DOMAIN_LIST}"
 	echo "Updating certificates in web server service: ${SERVER_SERVICE}"
@@ -71,16 +71,20 @@ then
 
 	docker service update ${secretAddParams} ${SERVER_SERVICE}
 
+	lastUpdateInSeconds=${lastUpdateInSecondsAfter}
+
 	echo "Certificates successfully updated!"
+else
+	lastUpdateInSeconds=${lastUpdateInSecondsBefore}
+
+	echo "Certificates are still valid!"
 fi
 
 sendMetricCmd="docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl \
 	--silent --data-binary @- ${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}"
 
-lastUpdateInSeconds="$(stat -c %Y ${fileToTestUpdate})"
-
 cat <<EOF | ${sendMetricCmd}
-	# HELP certificates_updated_date_seconds Certificates update date in seconds.
+	# HELP certificates_updated_date_seconds Certificates renewal date in seconds.
 	# TYPE certificates_updated_date_seconds gauge
 	certificates_updated_date_seconds{label="${CERT_NAME}"} ${lastUpdateInSeconds}
 EOF
@@ -90,5 +94,3 @@ cat <<EOF | ${sendMetricCmd}
 	# TYPE certificates_valid_date_seconds gauge
 	certificates_valid_date_seconds{label="${CERT_NAME}"} ${dateInSeconds}
 EOF
-
-echo "Certificates are still valid!"
