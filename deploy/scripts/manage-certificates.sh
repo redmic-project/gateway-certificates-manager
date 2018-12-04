@@ -71,19 +71,22 @@ then
 
 	docker service update ${secretAddParams} ${SERVER_SERVICE}
 
-	cat <<EOF | docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl --data-binary @- \
-		${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
-		# HELP certificates_updated_date_seconds Certificates updated date in seconds.
-		# TYPE certificates_updated_date_seconds gauge
-		certificates_updated_date_seconds{label="${CERT_NAME}"} ${dateInSeconds}
-EOF
-
 	echo "Certificates successfully updated!"
 fi
 
-cat <<EOF | docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl --data-binary @- \
-	${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}
-	# HELP certificates_valid_date_seconds Certificates still valid verification date in seconds.
+sendMetricCmd="docker run -i --rm --name alpine-curl --network metric-net byrnedo/alpine-curl \
+	--silent --data-binary @- ${PUSHGATEWAY_HOST}/metrics/job/${metricsJob}"
+
+lastUpdateInSeconds="$(stat -c %Y ${fileToTestUpdate})"
+
+cat <<EOF | ${sendMetricCmd}
+	# HELP certificates_updated_date_seconds Certificates update date in seconds.
+	# TYPE certificates_updated_date_seconds gauge
+	certificates_updated_date_seconds{label="${CERT_NAME}"} ${lastUpdateInSeconds}
+EOF
+
+cat <<EOF | ${sendMetricCmd}
+	# HELP certificates_valid_date_seconds Certificates verification date in seconds.
 	# TYPE certificates_valid_date_seconds gauge
 	certificates_valid_date_seconds{label="${CERT_NAME}"} ${dateInSeconds}
 EOF
