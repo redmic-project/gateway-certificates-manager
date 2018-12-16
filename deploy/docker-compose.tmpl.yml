@@ -18,6 +18,7 @@ services:
       - metric-net
     volumes:
       - config-vol:/certs
+      - lib-vol:/var/lib/docker
       - /var/run/docker.sock:/var/run/docker.sock
     configs:
       - source: manage-certificates
@@ -33,10 +34,11 @@ services:
           cpus: '0.5'
           memory: 64M
         reservations:
-          memory: 52M
+          memory: 16M
 
 networks:
   metric-net:
+    name: ${METRIC_NET_NAME:-metric-net}
     external: true
 
 volumes:
@@ -49,6 +51,10 @@ volumes:
   logs-vol:
     name: ${CERTBOT_LOGS_VOL_NAME}
 
+  lib-vol:
+    name: ${CERTIFICATES_MANAGER_LIB_VOL_NAME:-certificates-manager-lib-vol}
+
 configs:
   manage-certificates:
+    name: ${MANAGE_CERTIFICATES_NAME:-manage-certificates}
     file: ./scripts/manage-certificates.sh

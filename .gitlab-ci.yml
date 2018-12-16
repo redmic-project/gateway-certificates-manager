@@ -1,23 +1,22 @@
-image: docker:stable
-
 stages:
   - deploy
   - maintenance
 
+image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
+
 variables:
   DOCKER_DRIVER: overlay2
+  STACK: ${CI_PROJECT_NAME}
+  SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+  STATUS_CHECK_DELAY: 10
 
 services:
   - docker:dind
 
 deploy-supporting-branch-develop:
   stage: deploy
-  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
     SSH_REMOTE: ${DEV_SSH_REMOTE}
-    STACK: ${CI_PROJECT_NAME}
-    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
-    STATUS_CHECK_DELAY: 10
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
     CERT_NAME: ${DEV_CERT_NAME}
     DOMAIN_LIST: ${DEV_DOMAIN_LIST}
@@ -37,12 +36,8 @@ deploy-supporting-branch-develop:
 
 deploy-stable-branch-develop:
   stage: deploy
-  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
     SSH_REMOTE: ${DEV_SSH_REMOTE}
-    STACK: ${CI_PROJECT_NAME}
-    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
-    STATUS_CHECK_DELAY: 10
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
     CERT_NAME: ${DEV_CERT_NAME}
     DOMAIN_LIST: ${DEV_DOMAIN_LIST}
@@ -61,12 +56,8 @@ deploy-stable-branch-develop:
 
 deploy-supporting-branch-production:
   stage: deploy
-  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
     SSH_REMOTE: ${PRO_SSH_REMOTE}
-    STACK: ${CI_PROJECT_NAME}
-    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
-    STATUS_CHECK_DELAY: 10
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.prod.yml
     CERT_NAME: ${PRO_CERT_NAME}
     DOMAIN_LIST: ${PRO_DOMAIN_LIST}
@@ -86,12 +77,8 @@ deploy-supporting-branch-production:
 
 deploy-stable-branch-production:
   stage: deploy
-  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
     SSH_REMOTE: ${PRO_SSH_REMOTE}
-    STACK: ${CI_PROJECT_NAME}
-    SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
-    STATUS_CHECK_DELAY: 10
     COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.prod.yml
     CERT_NAME: ${PRO_CERT_NAME}
     DOMAIN_LIST: ${PRO_DOMAIN_LIST}
@@ -110,20 +97,16 @@ deploy-stable-branch-production:
 
 scheduled-renew-develop:
   stage: maintenance
-  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
     SSH_REMOTE: ${DEV_SSH_REMOTE}
-    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
   script: relaunch.sh
   only:
     - schedules
 
 scheduled-renew-production:
   stage: maintenance
-  image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
   variables:
     SSH_REMOTE: ${PRO_SSH_REMOTE}
-    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
   script: relaunch.sh
   only:
     - schedules
