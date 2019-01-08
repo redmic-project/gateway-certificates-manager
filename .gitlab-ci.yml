@@ -99,6 +99,7 @@ scheduled-renew-develop:
   stage: maintenance
   variables:
     SSH_REMOTE: ${DEV_SSH_REMOTE}
+    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
   script: relaunch.sh
   only:
     - schedules
@@ -107,6 +108,7 @@ scheduled-renew-production:
   stage: maintenance
   variables:
     SSH_REMOTE: ${PRO_SSH_REMOTE}
+    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
   script: relaunch.sh
   only:
     - schedules
