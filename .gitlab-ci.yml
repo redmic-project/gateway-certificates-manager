@@ -1,114 +1,33 @@
+include:
+  - project: 'redmic-project/gitlab-ci-templates'
+    ref: master
+    file: '/deployment.yml'
+
 stages:
   - deploy
   - maintenance
 
-image: registry.gitlab.com/redmic-project/docker/docker-deploy:latest
-
 variables:
-  DOCKER_DRIVER: overlay2
-  STACK: ${CI_PROJECT_NAME}
-  SERVICES_TO_CHECK: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
-  STATUS_CHECK_DELAY: 10
+  STACK: gateway
 
-services:
-  - docker:dind
-
-deploy-supporting-branch-develop:
-  stage: deploy
+.deploy:
   variables:
-    SSH_REMOTE: ${DEV_SSH_REMOTE}
-    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
-    CERT_NAME: ${DEV_CERT_NAME}
-    DOMAIN_LIST: ${DEV_DOMAIN_LIST}
-    EMAIL_LIST: ${DEV_EMAIL_LIST}
-  script:
-    - >
-      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
-      EMAIL_LIST=${EMAIL_LIST}
-  environment:
-    name: dev
-  only:
-    - branches
-  except:
-    - master
-    - schedules
-  when: manual
+    SERVICES_TO_CHECK: ${STACK}_${CI_PROJECT_NAME}
 
-deploy-stable-branch-develop:
-  stage: deploy
-  variables:
-    SSH_REMOTE: ${DEV_SSH_REMOTE}
-    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.dev.yml
-    CERT_NAME: ${DEV_CERT_NAME}
-    DOMAIN_LIST: ${DEV_DOMAIN_LIST}
-    EMAIL_LIST: ${DEV_EMAIL_LIST}
-  script:
-    - >
-      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
-      EMAIL_LIST=${EMAIL_LIST}
-  environment:
-    name: dev
-  only:
-    - master
-  except:
-    - schedules
-  when: manual
-
-deploy-supporting-branch-production:
-  stage: deploy
-  variables:
-    SSH_REMOTE: ${PRO_SSH_REMOTE}
-    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.prod.yml
-    CERT_NAME: ${PRO_CERT_NAME}
-    DOMAIN_LIST: ${PRO_DOMAIN_LIST}
-    EMAIL_LIST: ${PRO_EMAIL_LIST}
-  script:
-    - >
-      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
-      EMAIL_LIST=${EMAIL_LIST}
-  environment:
-    name: pro
-  only:
-    - branches
-  except:
-    - master
-    - schedules
-  when: manual
-
-deploy-stable-branch-production:
-  stage: deploy
-  variables:
-    SSH_REMOTE: ${PRO_SSH_REMOTE}
-    COMPOSE_FILE: docker-compose.tmpl.yml:docker-compose.prod.yml
-    CERT_NAME: ${PRO_CERT_NAME}
-    DOMAIN_LIST: ${PRO_DOMAIN_LIST}
-    EMAIL_LIST: ${PRO_EMAIL_LIST}
-  script:
-    - >
-      deploy.sh COMPOSE_FILE=${COMPOSE_FILE} CERT_NAME=${CERT_NAME} DOMAIN_LIST=${DOMAIN_LIST}
-      EMAIL_LIST=${EMAIL_LIST}
-  environment:
-    name: pro
-  only:
-    - master
-  except:
-    - schedules
-  when: manual
-
-scheduled-renew-develop:
+.scheduled-renew:
   stage: maintenance
   variables:
-    SSH_REMOTE: ${DEV_SSH_REMOTE}
-    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
+    SERVICE: ${STACK}_${CI_PROJECT_NAME}
   script: relaunch.sh
   only:
     - schedules
+
+scheduled-renew-development:
+  extends: .scheduled-renew
+  variables:
+    SSH_REMOTE: ${DEV_SSH_REMOTE}
 
 scheduled-renew-production:
-  stage: maintenance
+  extends: .scheduled-renew
   variables:
     SSH_REMOTE: ${PRO_SSH_REMOTE}
-    SERVICE: ${CI_PROJECT_NAME}_${CI_PROJECT_NAME}
-  script: relaunch.sh
-  only:
-    - schedules

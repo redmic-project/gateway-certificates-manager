@@ -1,8 +1,1 @@
 version: '3.5'
-
-services:
-  certificates-manager:
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager

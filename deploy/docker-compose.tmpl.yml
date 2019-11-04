@@ -2,23 +2,23 @@ version: '3.5'
 
 services:
   certificates-manager:
-    image: docker:latest
+    image: ${IMAGE_NAME:-docker}:${IMAGE_TAG:-latest}
     command: manage-certificates
     environment:
-      - CERT_NAME
-      - DOMAIN_LIST
-      - EMAIL_LIST
-      - SERVER_SERVICE
-      - CERTBOT_CONFIG_VOL_NAME
-      - CERTBOT_WORK_VOL_NAME
-      - CERTBOT_LOGS_VOL_NAME
-      - ACME_VOL_NAME
-      - PUSHGATEWAY_HOST
+      CERT_NAME:
+      DOMAIN_LIST:
+      EMAIL_LIST:
+      SERVER_SERVICE:
+      CERTBOT_CONFIG_VOL_NAME:
+      CERTBOT_WORK_VOL_NAME:
+      CERTBOT_LOGS_VOL_NAME:
+      ACME_VOL_NAME:
+      PUSHGATEWAY_HOST:
     networks:
-      - metric-net
+      metric-net:
     volumes:
       - config-vol:/certs
-      - lib-vol:/var/lib/docker
+      - docker-vol:/var/lib/docker
       - /var/run/docker.sock:/var/run/docker.sock
     configs:
       - source: manage-certificates
@@ -27,14 +27,18 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
       restart_policy:
         condition: none
       resources:
         limits:
-          cpus: '0.5'
-          memory: 64M
+          cpus: '${RESOURCES_LIMITS_CPUS:-0.5}'
+          memory: ${RESOURCES_LIMITS_MEMORY:-64M}
         reservations:
-          memory: 16M
+          cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-16M}
 
 networks:
   metric-net:
@@ -45,16 +49,16 @@ volumes:
   config-vol:
     name: ${CERTBOT_CONFIG_VOL_NAME}
 
+  docker-vol:
+    name: ${DOCKER_VOL_NAME:-certificates-manager-docker-vol}
+
   work-vol:
     name: ${CERTBOT_WORK_VOL_NAME}
 
   logs-vol:
     name: ${CERTBOT_LOGS_VOL_NAME}
 
-  lib-vol:
-    name: ${CERTIFICATES_MANAGER_LIB_VOL_NAME:-certificates-manager-lib-vol}
-
 configs:
   manage-certificates:
-    name: ${MANAGE_CERTIFICATES_NAME:-manage-certificates}
+    name: ${MANAGE_CERTIFICATES_NAME:-certificates-manager-script}
     file: ./scripts/manage-certificates.sh
