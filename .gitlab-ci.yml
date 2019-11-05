@@ -8,6 +8,8 @@ stages:
   - maintenance
 
 variables:
+  DD_IMAGE_NAME: docker
+  DD_IMAGE_TAG: latest
   STACK: gateway
 
 .deploy:
