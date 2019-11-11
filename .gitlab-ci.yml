@@ -18,6 +18,7 @@ variables:
 
 .scheduled-renew:
   stage: maintenance
+  image: ${DEPLOYMENT_IMAGE}
   variables:
     SERVICE: ${STACK}_${CI_PROJECT_NAME}
   script: relaunch.sh
