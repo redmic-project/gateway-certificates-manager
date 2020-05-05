@@ -2,35 +2,23 @@ include:
   - project: 'redmic-project/gitlab-ci-templates'
     ref: master
     file: '/deployment.yml'
+  - project: 'redmic-project/gitlab-ci-templates'
+    ref: master
+    file: '/maintenance.yml'
 
 stages:
   - deploy
   - maintenance
 
 variables:
-  DD_IMAGE_NAME: docker
-  DD_IMAGE_TAG: latest
-  STACK: gateway
+  PROJECT_PARENT_NAME: gateway
 
 .deploy:
   variables:
-    SERVICES_TO_CHECK: ${STACK}_${CI_PROJECT_NAME}
+    STACK: ${PROJECT_PARENT_NAME}
+    SERVICES_TO_CHECK: ${PROJECT_PARENT_NAME}_${CI_PROJECT_NAME}
 
-.scheduled-renew:
-  stage: maintenance
-  image: ${DEPLOYMENT_IMAGE}
+.scheduled-run:
   variables:
-    SERVICE: ${STACK}_${CI_PROJECT_NAME}
-  script: relaunch.sh
-  only:
-    - schedules
-
-scheduled-renew-development:
-  extends: .scheduled-renew
-  variables:
-    SSH_REMOTE: ${DEV_SSH_REMOTE}
-
-scheduled-renew-production:
-  extends: .scheduled-renew
-  variables:
-    SSH_REMOTE: ${PRO_SSH_REMOTE}
+    STACK: ${PROJECT_PARENT_NAME}
+    SERVICE: ${PROJECT_PARENT_NAME}_${CI_PROJECT_NAME}

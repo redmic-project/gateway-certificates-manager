@@ -43,6 +43,7 @@ services:
 networks:
   metric-net:
     name: ${METRIC_NET_NAME:-metric-net}
+    driver: ${METRIC_NET_DRIVER:-overlay}
     external: true
 
 volumes:

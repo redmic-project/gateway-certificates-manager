@@ -23,7 +23,6 @@ Requiere la definición de las siguientes variables de entorno:
 | **DOMAIN_LIST** | Dominios para los que se obtiene el certificado. Se define como una lista separada por comas. | redmic.es,www.redmic.es |
 | **EMAIL_LIST** | Direcciones de email utilizadas para obtener el certificado (y recibir notificaciones). Se define como una lista separada por comas. | user1@example.org,user2@example.org |
 
-
 También se pueden definir opcionalmente las siguientes variables de entorno:
 
 | Variable | Descripción | Valor por defecto |
@@ -40,5 +39,6 @@ También se pueden definir opcionalmente las siguientes variables de entorno:
 Siempre que se ejecuta con éxito el servicio, se exponen métricas *Prometheus* para conocer el estado de los certificados y poder generar alertas si algo no ha ido bien.
 
 Existen 2 métricas, etiquetadas con el nombre del certificado:
+
 * **certificates_updated_date_seconds**: Fecha en segundos de la última actualización del certificado.
 * **certificates_valid_date_seconds**: Fecha en segundos del último intento de actualización (necesario o no) del certificado.
