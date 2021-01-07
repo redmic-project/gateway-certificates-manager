@@ -10,3 +10,6 @@ services:
 volumes:
   config-vol:
     name: ${CERTBOT_CONFIG_VOL_NAME}
+
+  dhparams-vol:
+    name: ${DHPARAMS_VOL_NAME}

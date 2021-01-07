@@ -6,6 +6,17 @@ then
 	exit 1
 fi
 
+dhparamFile="/dhparams/dhparam.pem"
+if [ ! -e "${dhparamFile}" ]
+then
+	echo "DHParam not found, generating.."
+	docker run --rm --name openssl \
+		-v /dhparams:/dhparams \
+		frapsoft/openssl dhparam \
+			-out "${dhparamFile}" \
+			4096
+fi
+
 fileToTestUpdate="/certs/live/${CERT_NAME}/chain.pem"
 if [ -e "${fileToTestUpdate}" ]
 then
@@ -34,8 +45,6 @@ fi
 
 lastUpdateInSecondsAfter="$(stat -c %Y ${fileToTestUpdate})"
 
-serverStack=$(echo "${SERVER_SERVICE}" | cut -f 1 -d '_')
-
 metricsJob="cert-update"
 dateInSeconds="$(date +%s)"
 
@@ -63,6 +72,8 @@ then
 		echo "Updating service secret: ${secretName}"
 
 		docker secret rm ${secretName}
+
+		serverStack=$(echo "${SERVER_SERVICE}" | cut -f 1 -d '_')
 
 		cat /certs/live/${CERT_NAME}/${secretFile}.pem | docker secret create \
 			-l com.docker.stack.namespace=${serverStack} \

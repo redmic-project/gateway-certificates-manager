@@ -15,6 +15,7 @@ services:
     networks:
       metric-net:
     volumes:
+      - dhparams-vol:/dhparams
       - config-vol:/certs
       - acme-vol:/acme
       - docker-vol:/var/lib/docker
