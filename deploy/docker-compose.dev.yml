@@ -1,9 +1,10 @@
 version: '3.5'
 
-services:
-  certificates-manager:
-    deploy:
-      placement:
-        constraints:
-          - node.hostname == ${PLACEMENT_CONSTRAINTS_NODE_HOSTNAME:-hostname}
-          - node.labels.${PLACEMENT_CONSTRAINTS_NODE_LABELS_NAME:-gateway} == ${PLACEMENT_CONSTRAINTS_NODE_LABELS_VALUE:-true}
+volumes:
+  config-vol:
+    name: ${CERTBOT_CONFIG_VOL_NAME}
+    driver: local
+    driver_opts:
+      type: ${CERTBOT_CONFIG_VOL_TYPE:-nfs4}
+      o: addr=${CERTBOT_CONFIG_VOL_ADDR:-127.0.0.1},${CERTBOT_CONFIG_VOL_OPTIONS:-rw,nolock,noatime,tcp,rsize=8192,wsize=8192,timeo=14}
+      device: ${CERTBOT_CONFIG_VOL_DEVICE:-:/certbot-config-vol/}

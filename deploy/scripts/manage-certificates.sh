@@ -14,11 +14,11 @@ else
 	lastUpdateInSecondsBefore=0
 fi
 
-if ! docker run --rm \
-	-v ${CERTBOT_CONFIG_VOL_NAME}:/etc/letsencrypt \
+if ! docker run --rm --name certbot \
+	-v /certs:/etc/letsencrypt \
 	-v ${CERTBOT_WORK_VOL_NAME}:/var/lib/letsencrypt \
 	-v ${CERTBOT_LOGS_VOL_NAME}:/var/log/letsencrypt \
-	-v ${ACME_VOL_NAME}:/var/www/html \
+	-v /acme:/var/www/html \
 	certbot/certbot certonly \
 		--expand \
 		--keep-until-expiring \
