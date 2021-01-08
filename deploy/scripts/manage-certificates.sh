@@ -25,9 +25,11 @@ else
 	lastUpdateInSecondsBefore=0
 fi
 
+mkdir -p /work
+
 if ! docker run --rm --name certbot \
 	-v /certs:/etc/letsencrypt \
-	-v ${CERTBOT_WORK_VOL_NAME}:/var/lib/letsencrypt \
+	-v /work:/var/lib/letsencrypt \
 	-v ${CERTBOT_LOGS_VOL_NAME}:/var/log/letsencrypt \
 	-v /acme:/var/www/html \
 	certbot/certbot certonly \
