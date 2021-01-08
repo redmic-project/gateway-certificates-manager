@@ -11,10 +11,10 @@ if [ ! -e "${dhparamFile}" ]
 then
 	echo "DHParam not found, generating.."
 	docker run --rm --name openssl \
-		-v /dhparams:/dhparams \
+		-v ${DHPARAMS_VOL_NAME}:/dhparams \
 		frapsoft/openssl dhparam \
 			-out "${dhparamFile}" \
-			4096
+			${DH_NUMBITS}
 fi
 
 fileToTestUpdate="/certs/live/${CERT_NAME}/chain.pem"
@@ -28,10 +28,10 @@ fi
 mkdir -p /work
 
 if ! docker run --rm --name certbot \
-	-v /certs:/etc/letsencrypt \
 	-v /work:/var/lib/letsencrypt \
+	-v ${CERTBOT_CONFIG_VOL_NAME}:/etc/letsencrypt \
 	-v ${CERTBOT_LOGS_VOL_NAME}:/var/log/letsencrypt \
-	-v /acme:/var/www/html \
+	-v ${ACME_VOL_NAME}:/var/www/html \
 	certbot/certbot certonly \
 		--expand \
 		--keep-until-expiring \

@@ -1,14 +1,6 @@
 version: '3.5'
 
 volumes:
-  config-vol:
-    name: ${CERTBOT_CONFIG_VOL_NAME}
-    driver: local
-    driver_opts:
-      type: ${CERTBOT_CONFIG_VOL_TYPE:-nfs4}
-      o: addr=${CERTBOT_CONFIG_VOL_ADDR:-127.0.0.1},${CERTBOT_CONFIG_VOL_OPTIONS:-rw,nolock,noatime,tcp,rsize=8192,wsize=8192,timeo=14}
-      device: ${CERTBOT_CONFIG_VOL_DEVICE:-:/certbot-config-vol/}
-
   dhparams-vol:
     name: ${DHPARAMS_VOL_NAME}
     driver: local
@@ -16,3 +8,11 @@ volumes:
       type: ${DHPARAMS_VOL_TYPE:-nfs4}
       o: addr=${DHPARAMS_VOL_ADDR:-127.0.0.1},${DHPARAMS_VOL_OPTIONS:-rw,nolock,noatime,tcp,rsize=8192,wsize=8192,timeo=14}
       device: ${DHPARAMS_VOL_DEVICE:-:/dhparams-vol/}
+
+  config-vol:
+    name: ${CERTBOT_CONFIG_VOL_NAME}
+    driver: local
+    driver_opts:
+      type: ${CERTBOT_CONFIG_VOL_TYPE:-nfs4}
+      o: addr=${CERTBOT_CONFIG_VOL_ADDR:-127.0.0.1},${CERTBOT_CONFIG_VOL_OPTIONS:-rw,nolock,noatime,tcp,rsize=8192,wsize=8192,timeo=14}
+      device: ${CERTBOT_CONFIG_VOL_DEVICE:-:/certbot-config-vol/}

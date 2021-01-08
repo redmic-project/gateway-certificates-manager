@@ -8,8 +8,8 @@ services:
           - engine.labels.availability_zone == ${AWS_REGION}a
 
 volumes:
-  config-vol:
-    name: ${CERTBOT_CONFIG_VOL_NAME}
-
   dhparams-vol:
     name: ${DHPARAMS_VOL_NAME}
+
+  config-vol:
+    name: ${CERTBOT_CONFIG_VOL_NAME}
