@@ -8,17 +8,19 @@ services:
       CERT_NAME:
       DOMAIN_LIST:
       EMAIL_LIST:
-      SERVER_SERVICE:
+      DH_NUMBITS:
+      DHPARAMS_VOL_NAME:
       CERTBOT_CONFIG_VOL_NAME:
-      CERTBOT_WORK_VOL_NAME:
       CERTBOT_LOGS_VOL_NAME:
       ACME_VOL_NAME:
+      SERVER_SERVICE:
       PUSHGATEWAY_HOST:
     networks:
       metric-net:
     volumes:
+      - dhparams-vol:/dhparams
       - config-vol:/certs
-      - docker-vol:/var/lib/docker
+      - /var/lib/docker:/var/lib/docker
       - /var/run/docker.sock:/var/run/docker.sock
     configs:
       - source: manage-certificates
@@ -47,15 +49,6 @@ networks:
     external: true
 
 volumes:
-  config-vol:
-    name: ${CERTBOT_CONFIG_VOL_NAME}
-
-  docker-vol:
-    name: ${DOCKER_VOL_NAME:-certificates-manager-docker-vol}
-
-  work-vol:
-    name: ${CERTBOT_WORK_VOL_NAME}
-
   logs-vol:
     name: ${CERTBOT_LOGS_VOL_NAME}
 

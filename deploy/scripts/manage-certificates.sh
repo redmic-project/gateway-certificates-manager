@@ -6,6 +6,17 @@ then
 	exit 1
 fi
 
+dhparamFile="/dhparams/dhparam.pem"
+if [ ! -e "${dhparamFile}" ]
+then
+	echo "DHParam not found, generating.."
+	docker run --rm --name openssl \
+		-v ${DHPARAMS_VOL_NAME}:/dhparams \
+		frapsoft/openssl dhparam \
+			-out "${dhparamFile}" \
+			${DH_NUMBITS}
+fi
+
 fileToTestUpdate="/certs/live/${CERT_NAME}/chain.pem"
 if [ -e "${fileToTestUpdate}" ]
 then
@@ -14,9 +25,11 @@ else
 	lastUpdateInSecondsBefore=0
 fi
 
-if ! docker run --rm \
+mkdir -p /work
+
+if ! docker run --rm --name certbot \
+	-v /work:/var/lib/letsencrypt \
 	-v ${CERTBOT_CONFIG_VOL_NAME}:/etc/letsencrypt \
-	-v ${CERTBOT_WORK_VOL_NAME}:/var/lib/letsencrypt \
 	-v ${CERTBOT_LOGS_VOL_NAME}:/var/log/letsencrypt \
 	-v ${ACME_VOL_NAME}:/var/www/html \
 	certbot/certbot certonly \
@@ -33,8 +46,6 @@ then
 fi
 
 lastUpdateInSecondsAfter="$(stat -c %Y ${fileToTestUpdate})"
-
-serverStack=$(echo "${SERVER_SERVICE}" | cut -f 1 -d '_')
 
 metricsJob="cert-update"
 dateInSeconds="$(date +%s)"
@@ -63,6 +74,8 @@ then
 		echo "Updating service secret: ${secretName}"
 
 		docker secret rm ${secretName}
+
+		serverStack=$(echo "${SERVER_SERVICE}" | cut -f 1 -d '_')
 
 		cat /certs/live/${CERT_NAME}/${secretFile}.pem | docker secret create \
 			-l com.docker.stack.namespace=${serverStack} \

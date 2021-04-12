@@ -13,6 +13,8 @@ Las siguientes ejecuciones en las que no sea necesario renovar todavía, simplem
 
 La programación de renovación se realiza en GitLab, con una tarea de CI/CD que se ejecuta semanalmente. Es importante haber desplegado antes el servicio, para luego poder relanzarlo todas las semanas.
 
+También genera los parámetros Diffie-Hellman cuando no los tiene disponibles, para dejarlos a disposición del servidor web. Hay que tener paciencia porque es un proceso pesado.
+
 ## Uso
 
 Requiere la definición de las siguientes variables de entorno:
@@ -27,12 +29,13 @@ También se pueden definir opcionalmente las siguientes variables de entorno:
 
 | Variable | Descripción | Valor por defecto |
 |:-:|:-:|:-:|
-| SERVER_SERVICE | Nombre del servicio (*Docker Swarm*, `<stack>_<service-name>`) del servidor web. | `nginx-proxy_nginx-proxy` |
-| CERTBOT_CONFIG_VOL_NAME | Nombre del volumen Docker donde se almacena la configuración de certbot y los certificados (se montará sobre `/etc/letsencrypt`). | `certbot-config-vol` |
-| CERTBOT_WORK_VOL_NAME | Nombre del volumen Docker donde se almacenan ficheros internos de certbot (se montará sobre `/var/lib/letsencrypt`). | `certbot-work-vol` |
-| CERTBOT_LOGS_VOL_NAME | Nombre del volumen donde se guardan los logs de certbot, por si hace falta consultarlos (se montará sobre `/var/log/letsencrypt`). | `certbot-logs-vol` |
-| ACME_VOL_NAME | Nombre del volumen donde almacenar los ficheros usados para verificar (responder a los *challenges*) el dominio a certificar. También debe ser montado por el servidor web, para que exponga los ficheros en la ruta `/.well-known/acme-challenge/`. No será necesario si la validación se realiza mediante registros DNS (aún no disponible). | `acme-vol` |
+| DH_NUMBITS | Complejidad de los parámetros DH generados para el servidor web. Reducir el tamaño acelerará los cálculos. | `4096` |
+| SERVER_SERVICE | Nombre del servicio (*Docker Swarm*, `<stack>_<service-name>`) del servidor web. | `gateway_nginx-proxy-https` |
 | PUSHGATEWAY_HOST | Dirección del servicio Pushgateway al que se enviarán las métricas Prometheus de monitorización. | `pushgateway:9091` |
+| DHPARAMS_VOL_NAME | Nombre del volumen Docker donde se almacenan los parámetros DH generados, si no existen ya allí (se montará sobre `/dhparams`). | `dhparams-vol` |
+| CERTBOT_CONFIG_VOL_NAME | Nombre del volumen Docker donde se almacena la configuración de certbot y los certificados (se montará sobre `/etc/letsencrypt`). | `certbot-config-vol` |
+| CERTBOT_LOGS_VOL_NAME | Nombre del volumen donde se guardan los logs de certbot, por si hace falta consultarlos (se montará sobre `/var/log/letsencrypt`). | `certbot-logs-vol` |
+| ACME_VOL_NAME | Nombre del volumen Docker donde almacenar los ficheros usados para verificar (responder a los *challenges*) el dominio a certificar. También debe ser montado por el servidor web, para que exponga los ficheros en la ruta `/.well-known/acme-challenge/`. No será necesario si la validación se realiza mediante registros DNS (aún no disponible). | `acme-vol` |
 
 ## Métricas
 

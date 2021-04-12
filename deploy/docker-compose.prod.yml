@@ -6,3 +6,10 @@ services:
       placement:
         constraints:
           - engine.labels.availability_zone == ${AWS_REGION}a
+
+volumes:
+  dhparams-vol:
+    name: ${DHPARAMS_VOL_NAME}
+
+  config-vol:
+    name: ${CERTBOT_CONFIG_VOL_NAME}
