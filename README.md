@@ -29,7 +29,7 @@ También se pueden definir opcionalmente las siguientes variables de entorno:
 
 | Variable | Descripción | Valor por defecto |
 |:-:|:-:|:-:|
-| DH_NUMBITS | Complejidad de los parámetros DH generados para el servidor web. Reducir el tamaño acelerará los cálculos. | `4096` |
+| DH_NUMBITS | Complejidad de los parámetros DH generados para el servidor web. Reducir el tamaño acelerará los cálculos. | `2048` |
 | SERVER_SERVICE | Nombre del servicio (*Docker Swarm*, `<stack>_<service-name>`) del servidor web. | `gateway_nginx-proxy-https` |
 | PUSHGATEWAY_HOST | Dirección del servicio Pushgateway al que se enviarán las métricas Prometheus de monitorización. | `pushgateway:9091` |
 | DHPARAMS_VOL_NAME | Nombre del volumen Docker donde se almacenan los parámetros DH generados, si no existen ya allí (se montará sobre `/dhparams`). | `dhparams-vol` |

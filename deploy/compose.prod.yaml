@@ -1,0 +1,18 @@
+volumes:
+  dhparams-vol:
+    name: ${DHPARAMS_VOL_NAME}
+    driver: ${PRO_VOL_DRIVER}
+    driver_opts:
+      backing: shared
+
+  config-vol:
+    name: ${CERTBOT_CONFIG_VOL_NAME}
+    driver: ${PRO_VOL_DRIVER}
+    driver_opts:
+      backing: shared
+
+  acme-vol:
+    name: ${ACME_VOL_NAME}
+    driver: ${PRO_VOL_DRIVER}
+    driver_opts:
+      backing: shared
