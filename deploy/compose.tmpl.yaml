@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   certificates-manager:
     image: ${IMAGE_NAME:-docker}:${IMAGE_TAG:-latest}
@@ -37,11 +35,11 @@ services:
         condition: none
       resources:
         limits:
-          cpus: '${RESOURCES_LIMITS_CPUS:-0.5}'
-          memory: ${RESOURCES_LIMITS_MEMORY:-64M}
+          cpus: '${RESOURCES_LIMITS_CPUS:-1}'
+          memory: ${RESOURCES_LIMITS_MEMORY:-128M}
         reservations:
           cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
-          memory: ${RESOURCES_RESERVATIONS_MEMORY:-16M}
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-32M}
 
 networks:
   metric-net:
